@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlexiAura - Consultoria & Indústria</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            primary: 'var(--primary-color)',
+            secondary: 'var(--secondary-color)',
+            accent: 'var(--accent-color)',
+            body: 'var(--body-bg)',
+            card: 'var(--card-bg)',
+            text: 'var(--text-color)',
+            gray: 'var(--gray-color)',
+            'light-gray': 'var(--light-gray)',
+          },
+          boxShadow: {
+            custom: 'var(--shadow)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      /* Light theme variables */
+      --primary-color: #1a365d;
+      --secondary-color: #2d5aa0;
+      --accent-color: #d4af37;
+      --light-color: #f8f9fa;
+      --dark-color: #121212;
+      --gray-color: #6c757d;
+      --light-gray: #e9ecef;
+      --card-bg: #ffffff;
+      --body-bg: #f5f7fa;
+      --text-color: #333333;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme variables */
+      --primary-color: #2d5aa0;
+      --secondary-color: #4a7fd4;
+      --accent-color: #d4af37;
+      --light-color: #1e1e1e;
+      --dark-color: #f8f9fa;
+      --gray-color: #a0a0a0;
+      --light-gray: #2a2a2a;
+      --card-bg: #252525;
+      --body-bg: #121212;
+      --text-color: #e0e0e0;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 100px;
+      /* Offset for fixed header */
+    }
+
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      will-change: opacity, visibility;
+    }
+
+    .fade-in-section.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* RTL Support */
+    html[dir="rtl"] {
+      text-align: right;
+    }
+
+    html[dir="rtl"] .rtl-flip {
+      transform: scaleX(-1);
+    }
+
+    html[dir="rtl"] .ml-auto {
+      margin-left: 0;
+      margin-right: auto;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-body text-text font-sans antialiased overflow-x-hidden">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
