@@ -30,6 +30,8 @@ const CrossyRoadGame: React.FC = () => {
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
 
+    const [level, setLevel] = useState(1);
+
     // Player state
     const playerRef = useRef({
         x: PLAYER_START_X,
@@ -57,10 +59,13 @@ const CrossyRoadGame: React.FC = () => {
                 const direction = Math.random() > 0.5 ? 1 : -1;
                 const colors = ['#ff4444', '#4444ff', '#44ff44', '#ffff44', '#ff44ff'];
 
+                // Increase speed based on level
+                const speedMultiplier = 1 + (level - 1) * 0.2;
+
                 for (let j = 0; j < numCars; j++) {
                     cars.push({
                         x: Math.random() * (CANVAS_WIDTH / CELL_SIZE),
-                        speed: (Math.random() * 0.02 + 0.01) * direction,
+                        speed: (Math.random() * 0.03 + 0.02) * direction * speedMultiplier,
                         direction,
                         color: colors[Math.floor(Math.random() * colors.length)]
                     });
@@ -75,14 +80,17 @@ const CrossyRoadGame: React.FC = () => {
         return lanes;
     };
 
-    const resetGame = () => {
+    const resetGame = (resetLevel = true) => {
+        if (resetLevel) {
+            setLevel(1);
+            setScore(0);
+        }
         playerRef.current = {
             x: PLAYER_START_X,
             y: PLAYER_START_Y,
             maxY: PLAYER_START_Y
         };
         lanesRef.current = generateLanes();
-        setScore(0);
         setGameState('playing');
     };
 
@@ -106,6 +114,64 @@ const CrossyRoadGame: React.FC = () => {
         return false;
     };
 
+    const drawTree = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+        // Simple pixel art tree
+        ctx.fillStyle = '#8B4513'; // Trunk
+        ctx.fillRect(x + 12, y + 20, 16, 20);
+        ctx.fillStyle = '#228B22'; // Leaves
+        ctx.beginPath();
+        ctx.moveTo(x + 20, y);
+        ctx.lineTo(x + 40, y + 25);
+        ctx.lineTo(x, y + 25);
+        ctx.fill();
+        ctx.beginPath(); // Lower leaves
+        ctx.moveTo(x + 20, y + 10);
+        ctx.lineTo(x + 40, y + 35);
+        ctx.lineTo(x, y + 35);
+        ctx.fill();
+    };
+
+    const drawCar = (ctx: CanvasRenderingContext2D, car: Car, x: number, y: number) => {
+        const carWidth = CELL_SIZE * 1.5;
+        const carHeight = CELL_SIZE - 10;
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(x + 5, y + 5, carWidth, carHeight);
+
+        // Body
+        ctx.fillStyle = car.color;
+        // Rounded rect
+        ctx.beginPath();
+        ctx.roundRect(x, y, carWidth, carHeight, 5);
+        ctx.fill();
+
+        // Roof
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(x + 5, y + 5, carWidth - 10, carHeight - 10);
+
+        // Windows/Light
+        ctx.fillStyle = '#aaddee';
+        if (car.direction === 1) {
+            ctx.fillRect(x + carWidth - 12, y + 5, 8, carHeight - 10); // Front windshield
+            ctx.fillStyle = '#ffffcc'; // Headlights
+            ctx.fillRect(x + carWidth - 2, y + 5, 2, 5);
+            ctx.fillRect(x + carWidth - 2, y + carHeight - 10, 2, 5);
+        } else {
+            ctx.fillRect(x + 4, y + 5, 8, carHeight - 10);
+            ctx.fillStyle = '#ffffcc';
+            ctx.fillRect(x, y + 5, 2, 5);
+            ctx.fillRect(x, y + carHeight - 10, 2, 5);
+        }
+
+        // Wheels
+        ctx.fillStyle = '#000';
+        ctx.fillRect(x + 5, y - 2, 8, 4);
+        ctx.fillRect(x + carWidth - 13, y - 2, 8, 4);
+        ctx.fillRect(x + 5, y + carHeight - 2, 8, 4);
+        ctx.fillRect(x + carWidth - 13, y + carHeight - 2, 8, 4);
+    };
+
     const gameLoop = () => {
         const canvas = canvasRef.current;
         if (!canvas || gameState !== 'playing') return;
@@ -118,29 +184,41 @@ const CrossyRoadGame: React.FC = () => {
         // Clear canvas
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+        // Win/Level Up Condition
+        if (player.y === 0) {
+            setLevel(l => l + 1);
+            playerRef.current = {
+                x: PLAYER_START_X,
+                y: PLAYER_START_Y,
+                maxY: PLAYER_START_Y
+            };
+            lanesRef.current = generateLanes();
+            // Bonus score
+            setScore(s => s + 50);
+            return;
+        }
+
         // Draw lanes
         lanes.forEach(lane => {
             const yPos = lane.y * CELL_SIZE;
 
             if (lane.type === 'grass') {
-                ctx.fillStyle = '#4a7c59';
+                ctx.fillStyle = '#8fbc8f'; // Lighter grass
                 ctx.fillRect(0, yPos, CANVAS_WIDTH, CELL_SIZE);
-                // Grass pattern
-                ctx.fillStyle = '#3d6b4a';
-                for (let i = 0; i < CANVAS_WIDTH; i += 10) {
-                    for (let j = 0; j < CELL_SIZE; j += 10) {
-                        if (Math.random() > 0.7) {
-                            ctx.fillRect(i, yPos + j, 2, 2);
-                        }
+                // Draw some random trees (static based on lane index to prevent flicker)
+                // Using pseudo-random based on position
+                for (let i = 0; i < CANVAS_WIDTH / CELL_SIZE; i++) {
+                    if (Math.sin(lane.y * 10 + i * 5) > 0.8) { // Deterministic random
+                        drawTree(ctx, i * CELL_SIZE, yPos - 10); // Overlap slightly
                     }
                 }
             } else if (lane.type === 'road') {
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = '#555'; // Darker road
                 ctx.fillRect(0, yPos, CANVAS_WIDTH, CELL_SIZE);
                 // Road lines
-                ctx.strokeStyle = '#ffff00';
+                ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
-                ctx.setLineDash([10, 10]);
+                ctx.setLineDash([15, 15]);
                 ctx.beginPath();
                 ctx.moveTo(0, yPos + CELL_SIZE / 2);
                 ctx.lineTo(CANVAS_WIDTH, yPos + CELL_SIZE / 2);
@@ -160,23 +238,7 @@ const CrossyRoadGame: React.FC = () => {
                         }
 
                         // Draw car
-                        const carX = car.x * CELL_SIZE;
-                        const carY = yPos + 5;
-                        const carWidth = CELL_SIZE * 1.5;
-                        const carHeight = CELL_SIZE - 10;
-
-                        ctx.fillStyle = car.color;
-                        ctx.fillRect(carX, carY, carWidth, carHeight);
-                        ctx.fillStyle = '#222';
-                        ctx.fillRect(carX + 5, carY + 5, carWidth - 10, carHeight - 10);
-
-                        // Windows
-                        ctx.fillStyle = '#88ccff';
-                        if (car.direction === 1) {
-                            ctx.fillRect(carX + carWidth - 15, carY + 7, 8, carHeight - 14);
-                        } else {
-                            ctx.fillRect(carX + 7, carY + 7, 8, carHeight - 14);
-                        }
+                        drawCar(ctx, car, car.x * CELL_SIZE, yPos + 5);
                     });
                 }
             }
@@ -186,37 +248,49 @@ const CrossyRoadGame: React.FC = () => {
         const playerX = player.x * CELL_SIZE;
         const playerY = player.y * CELL_SIZE;
 
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(playerX + 20, playerY + 35, 12, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         // Body
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(playerX + CELL_SIZE / 2, playerY + CELL_SIZE / 2, CELL_SIZE / 3, 0, Math.PI * 2);
+        // Rounded body
+        ctx.roundRect(playerX + 5, playerY + 5, 30, 30, 8);
         ctx.fill();
 
-        // Head
-        ctx.beginPath();
-        ctx.arc(playerX + CELL_SIZE / 2, playerY + CELL_SIZE / 3, CELL_SIZE / 4, 0, Math.PI * 2);
-        ctx.fill();
+        // Comb
+        ctx.fillStyle = '#ff3333';
+        ctx.fillRect(playerX + 15, playerY, 10, 6);
 
         // Beak
-        ctx.fillStyle = '#ff9900';
+        ctx.fillStyle = '#ffaa00';
         ctx.beginPath();
-        ctx.moveTo(playerX + CELL_SIZE / 2, playerY + CELL_SIZE / 3);
-        ctx.lineTo(playerX + CELL_SIZE / 2 + 8, playerY + CELL_SIZE / 3 - 3);
-        ctx.lineTo(playerX + CELL_SIZE / 2 + 8, playerY + CELL_SIZE / 3 + 3);
+        ctx.moveTo(playerX + 35, playerY + 15);
+        ctx.lineTo(playerX + 42, playerY + 18);
+        ctx.lineTo(playerX + 35, playerY + 21);
         ctx.fill();
 
         // Eyes
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.arc(playerX + CELL_SIZE / 2 - 5, playerY + CELL_SIZE / 3 - 3, 2, 0, Math.PI * 2);
-        ctx.arc(playerX + CELL_SIZE / 2 + 5, playerY + CELL_SIZE / 3 - 3, 2, 0, Math.PI * 2);
+        ctx.arc(playerX + 28, playerY + 15, 2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.beginPath(); // Other eye
+        ctx.arc(playerX + 18, playerY + 15, 2, 0, Math.PI * 2);
+        ctx.fill(); // (Though conceptually viewed from side/top)
 
-        // Comb
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(playerX + CELL_SIZE / 2 - 3, playerY + CELL_SIZE / 3 - 10, 2, 5);
-        ctx.fillRect(playerX + CELL_SIZE / 2, playerY + CELL_SIZE / 3 - 12, 2, 7);
-        ctx.fillRect(playerX + CELL_SIZE / 2 + 3, playerY + CELL_SIZE / 3 - 10, 2, 5);
+        // Legs
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(playerX + 15, playerY + 35);
+        ctx.lineTo(playerX + 15, playerY + 40);
+        ctx.moveTo(playerX + 25, playerY + 35);
+        ctx.lineTo(playerX + 25, playerY + 40);
+        ctx.stroke();
 
         // Check collision
         if (checkCollision()) {
@@ -291,8 +365,8 @@ const CrossyRoadGame: React.FC = () => {
                     className="bg-body rounded-xl shadow-2xl border-4 border-[#4a7c59] w-full h-auto max-w-full"
                 />
                 {gameState === 'playing' && (
-                    <div className="absolute top-[-15px] left-1/2 transform -translate-x-1/2 bg-accent text-black px-6 py-1 rounded-full text-lg font-bold shadow-lg border-2 border-white z-10">
-                        Score: {score}
+                    <div className="absolute top-[-15px] left-1/2 transform -translate-x-1/2 bg-accent text-black px-6 py-1 rounded-full text-lg font-bold shadow-lg border-2 border-white z-10 whitespace-nowrap">
+                        Level: {level} | Score: {score}
                     </div>
                 )}
                 {gameState === 'menu' && (
@@ -302,7 +376,7 @@ const CrossyRoadGame: React.FC = () => {
                             <p className="text-white mb-4">Use arrow keys to move</p>
                             <p className="text-white mb-4 text-sm">Avoid cars and reach the top!</p>
                             <button
-                                onClick={resetGame}
+                                onClick={() => resetGame(true)}
                                 className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition-colors"
                             >
                                 Start Game

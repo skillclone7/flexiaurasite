@@ -148,11 +148,7 @@ const ChessGame: React.FC = () => {
         const fromPiece = board[selectedPos.row][selectedPos.col];
         if (isValidMove(selectedPos, { row, col }, fromPiece, clickedPiece)) {
           // Execute move
-          const newBoard = [...board.map(r => [...r])];
-          newBoard[row][col] = fromPiece;
-          newBoard[selectedPos.row][selectedPos.col] = null;
-          setBoard(newBoard);
-          setTurn(turn === 'w' ? 'b' : 'w');
+          executeMove(selectedPos, { row, col });
           setSelectedPos(null);
         } else {
           // If clicked on another own piece, switch selection
@@ -165,6 +161,61 @@ const ChessGame: React.FC = () => {
       }
     }
   };
+
+  const executeMove = (from: Position, to: Position) => {
+    const newBoard = [...board.map(r => [...r])];
+    const fromPiece = newBoard[from.row][from.col];
+    newBoard[to.row][to.col] = fromPiece;
+    newBoard[from.row][from.col] = null;
+    setBoard(newBoard);
+    setTurn(turn === 'w' ? 'b' : 'w');
+  };
+
+  // AI Logic
+  useEffect(() => {
+    if (gameRunning && turn === 'b') {
+      const timer = setTimeout(() => {
+        const allMoves: { from: Position, to: Position, target: Piece }[] = [];
+
+        // Collect all valid moves for black
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.color === 'b') {
+              for (let tr = 0; tr < 8; tr++) {
+                for (let tc = 0; tc < 8; tc++) {
+                  if (isValidMove({ row: r, col: c }, { row: tr, col: tc }, piece, board[tr][tc])) {
+                    allMoves.push({
+                      from: { row: r, col: c },
+                      to: { row: tr, col: tc },
+                      target: board[tr][tc]
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        if (allMoves.length > 0) {
+          // Prioritize captures
+          const captures = allMoves.filter(m => m.target !== null);
+          if (captures.length > 0) {
+            const move = captures[Math.floor(Math.random() * captures.length)];
+            executeMove(move.from, move.to);
+          } else {
+            const move = allMoves[Math.floor(Math.random() * allMoves.length)];
+            executeMove(move.from, move.to);
+          }
+        } else {
+          // No moves? Checkmate/Stalemate (simplified: just pass turn or end game)
+          // For now, let's just pass or stop
+          setGameRunning(false);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [gameRunning, turn, board]);
 
   const resetGame = () => {
     setBoard(JSON.parse(JSON.stringify(initialBoard)));

@@ -298,6 +298,8 @@ const Match3Game: React.FC = () => {
             const dCol = Math.abs(selected.col - col);
 
             if (dRow + dCol === 1) { // Adjacent
+                if (!gridRef.current[row][col] || !gridRef.current[selected.row][selected.col]) return;
+
                 // Swap
                 const grid = gridRef.current;
                 const temp = grid[row][col];
