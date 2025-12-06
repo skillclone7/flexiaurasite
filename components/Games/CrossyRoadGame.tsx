@@ -237,34 +237,43 @@ const CrossyRoadGame: React.FC = () => {
         return () => cancelAnimationFrame(animationRef.current);
     }, [gameState]);
 
+    const handleDirection = (dir: 'up' | 'down' | 'left' | 'right') => {
+        const now = Date.now();
+        if (now - lastMoveTime.current < MOVE_DELAY) return;
+
+        const player = playerRef.current;
+        let moved = false;
+
+        if (dir === 'up' && player.y > 0) {
+            player.y--;
+            moved = true;
+            if (player.y < player.maxY) {
+                player.maxY = player.y;
+                setScore(prev => prev + 10);
+            }
+        } else if (dir === 'down' && player.y < Math.floor(CANVAS_HEIGHT / CELL_SIZE) - 1) {
+            player.y++;
+            moved = true;
+        } else if (dir === 'left' && player.x > 0) {
+            player.x--;
+            moved = true;
+        } else if (dir === 'right' && player.x < Math.floor(CANVAS_WIDTH / CELL_SIZE) - 1) {
+            player.x++;
+            moved = true;
+        }
+
+        if (moved) {
+            lastMoveTime.current = now;
+        }
+    };
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            const now = Date.now();
-            if (now - lastMoveTime.current < MOVE_DELAY) return;
-
-            const player = playerRef.current;
-            let moved = false;
-
-            if (e.key === 'ArrowUp' && player.y > 0) {
-                player.y--;
-                moved = true;
-                if (player.y < player.maxY) {
-                    player.maxY = player.y;
-                    setScore(prev => prev + 10);
-                }
-            } else if (e.key === 'ArrowDown' && player.y < Math.floor(CANVAS_HEIGHT / CELL_SIZE) - 1) {
-                player.y++;
-                moved = true;
-            } else if (e.key === 'ArrowLeft' && player.x > 0) {
-                player.x--;
-                moved = true;
-            } else if (e.key === 'ArrowRight' && player.x < Math.floor(CANVAS_WIDTH / CELL_SIZE) - 1) {
-                player.x++;
-                moved = true;
-            }
-
-            if (moved) {
-                lastMoveTime.current = now;
+            switch (e.key) {
+                case 'ArrowUp': handleDirection('up'); break;
+                case 'ArrowDown': handleDirection('down'); break;
+                case 'ArrowLeft': handleDirection('left'); break;
+                case 'ArrowRight': handleDirection('right'); break;
             }
         };
 
@@ -322,7 +331,38 @@ const CrossyRoadGame: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Mobile Controls */}
+            <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
+                <div></div>
+                <button
+                    className="w-16 h-16 bg-gray-700 text-white rounded-full flex items-center justify-center text-2xl shadow-lg active:bg-gray-600"
+                    onClick={() => handleDirection('up')}
+                >
+                    ↑
+                </button>
+                <div></div>
+                <button
+                    className="w-16 h-16 bg-gray-700 text-white rounded-full flex items-center justify-center text-2xl shadow-lg active:bg-gray-600"
+                    onClick={() => handleDirection('left')}
+                >
+                    ←
+                </button>
+                <button
+                    className="w-16 h-16 bg-gray-700 text-white rounded-full flex items-center justify-center text-2xl shadow-lg active:bg-gray-600"
+                    onClick={() => handleDirection('down')}
+                >
+                    ↓
+                </button>
+                <button
+                    className="w-16 h-16 bg-gray-700 text-white rounded-full flex items-center justify-center text-2xl shadow-lg active:bg-gray-600"
+                    onClick={() => handleDirection('right')}
+                >
+                    →
+                </button>
+            </div>
         </div>
+
     );
 };
 

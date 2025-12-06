@@ -52,10 +52,10 @@ const ChessGame: React.FC = () => {
       for (let col = 0; col < 8; col++) {
         // Draw Square
         let fill = (row + col) % 2 === 0 ? '#F0D9B5' : '#B58863';
-        
+
         // Highlight selected
         if (selectedPos && selectedPos.row === row && selectedPos.col === col) {
-            fill = '#829769'; // Selected highlight
+          fill = '#829769'; // Selected highlight
         }
 
         ctx.fillStyle = fill;
@@ -72,11 +72,11 @@ const ChessGame: React.FC = () => {
     }
 
     if (!gameRunning) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, BOARD_SIZE, BOARD_SIZE);
-        ctx.fillStyle = '#fff';
-        ctx.font = '24px Arial';
-        ctx.fillText(t('startGame'), BOARD_SIZE / 2, BOARD_SIZE / 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.fillText(t('startGame'), BOARD_SIZE / 2, BOARD_SIZE / 2);
     }
   }, [board, selectedPos, gameRunning, t]);
 
@@ -96,28 +96,28 @@ const ChessGame: React.FC = () => {
 
     // Simplified movement rules (not checking full path collision for sliding pieces for brevity, but playable)
     switch (piece.type) {
-        case 'p': // Pawn
-            const dir = piece.color === 'w' ? -1 : 1;
-            const startRow = piece.color === 'w' ? 6 : 1;
-            // Move forward 1
-            if (dx === 0 && dy === dir && !target) return true;
-            // Move forward 2
-            if (dx === 0 && dy === dir * 2 && from.row === startRow && !target && !board[from.row + dir][from.col]) return true;
-            // Capture
-            if (absDx === 1 && dy === dir && target) return true;
-            return false;
-        case 'r': // Rook
-            return dx === 0 || dy === 0;
-        case 'n': // Knight
-            return (absDx === 1 && absDy === 2) || (absDx === 2 && absDy === 1);
-        case 'b': // Bishop
-            return absDx === absDy;
-        case 'q': // Queen
-            return absDx === absDy || dx === 0 || dy === 0;
-        case 'k': // King
-            return absDx <= 1 && absDy <= 1;
-        default:
-            return false;
+      case 'p': // Pawn
+        const dir = piece.color === 'w' ? -1 : 1;
+        const startRow = piece.color === 'w' ? 6 : 1;
+        // Move forward 1
+        if (dx === 0 && dy === dir && !target) return true;
+        // Move forward 2
+        if (dx === 0 && dy === dir * 2 && from.row === startRow && !target && !board[from.row + dir][from.col]) return true;
+        // Capture
+        if (absDx === 1 && dy === dir && target) return true;
+        return false;
+      case 'r': // Rook
+        return dx === 0 || dy === 0;
+      case 'n': // Knight
+        return (absDx === 1 && absDy === 2) || (absDx === 2 && absDy === 1);
+      case 'b': // Bishop
+        return absDx === absDy;
+      case 'q': // Queen
+        return absDx === absDy || dx === 0 || dy === 0;
+      case 'k': // King
+        return absDx <= 1 && absDy <= 1;
+      default:
+        return false;
     }
   };
 
@@ -125,8 +125,11 @@ const ChessGame: React.FC = () => {
     if (!gameRunning) return;
 
     const rect = canvasRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvasRef.current!.width / rect.width;
+    const scaleY = canvasRef.current!.height / rect.height;
+
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     const col = Math.floor(x / SQUARE_SIZE);
     const row = Math.floor(y / SQUARE_SIZE);
 
@@ -144,20 +147,20 @@ const ChessGame: React.FC = () => {
       } else {
         const fromPiece = board[selectedPos.row][selectedPos.col];
         if (isValidMove(selectedPos, { row, col }, fromPiece, clickedPiece)) {
-            // Execute move
-            const newBoard = [...board.map(r => [...r])];
-            newBoard[row][col] = fromPiece;
-            newBoard[selectedPos.row][selectedPos.col] = null;
-            setBoard(newBoard);
-            setTurn(turn === 'w' ? 'b' : 'w');
-            setSelectedPos(null);
+          // Execute move
+          const newBoard = [...board.map(r => [...r])];
+          newBoard[row][col] = fromPiece;
+          newBoard[selectedPos.row][selectedPos.col] = null;
+          setBoard(newBoard);
+          setTurn(turn === 'w' ? 'b' : 'w');
+          setSelectedPos(null);
         } else {
-            // If clicked on another own piece, switch selection
-            if (clickedPiece && clickedPiece.color === turn) {
-                setSelectedPos({ row, col });
-            } else {
-                setSelectedPos(null);
-            }
+          // If clicked on another own piece, switch selection
+          if (clickedPiece && clickedPiece.color === turn) {
+            setSelectedPos({ row, col });
+          } else {
+            setSelectedPos(null);
+          }
         }
       }
     }
@@ -174,33 +177,33 @@ const ChessGame: React.FC = () => {
     <div className="flex flex-col items-center w-full">
       <div className="relative">
         <canvas
-            ref={canvasRef}
-            width={BOARD_SIZE}
-            height={BOARD_SIZE}
-            onClick={handleCanvasClick}
-            className="bg-body rounded-lg block mx-auto max-w-full shadow-md cursor-pointer"
+          ref={canvasRef}
+          width={BOARD_SIZE}
+          height={BOARD_SIZE}
+          onClick={handleCanvasClick}
+          className="bg-body rounded-lg block mx-auto max-w-full shadow-md cursor-pointer"
         />
         {/* Turn indicator */}
         {gameRunning && (
-            <div className="absolute top-2 right-2 bg-white/80 px-2 py-1 rounded text-xs font-bold shadow">
-                Turn: {turn === 'w' ? 'White' : 'Black'}
-            </div>
+          <div className="absolute top-2 right-2 bg-white/80 px-2 py-1 rounded text-xs font-bold shadow">
+            Turn: {turn === 'w' ? 'White' : 'Black'}
+          </div>
         )}
       </div>
 
       <div className="flex justify-center gap-4 mt-8">
         <button
-            className={`bg-primary text-white border-none px-5 py-2.5 rounded hover:bg-secondary transition-colors ${gameRunning ? 'hidden' : ''}`}
-            onClick={() => setGameRunning(true)}
+          className={`bg-primary text-white border-none px-5 py-2.5 rounded hover:bg-secondary transition-colors ${gameRunning ? 'hidden' : ''}`}
+          onClick={() => setGameRunning(true)}
         >
-            {t('startGame')}
+          {t('startGame')}
         </button>
         {/* Chess doesn't really pause, but we can hide Start and show Restart when running */}
         <button
-            className="bg-primary text-white border-none px-5 py-2.5 rounded hover:bg-secondary transition-colors"
-            onClick={resetGame}
+          className="bg-primary text-white border-none px-5 py-2.5 rounded hover:bg-secondary transition-colors"
+          onClick={resetGame}
         >
-            {t('resetGame')}
+          {t('resetGame')}
         </button>
       </div>
     </div>

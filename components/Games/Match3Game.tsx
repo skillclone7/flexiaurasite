@@ -283,8 +283,11 @@ const Match3Game: React.FC = () => {
         if (!gameRunning || gamePaused || isAnimating) return;
 
         const rect = canvasRef.current!.getBoundingClientRect();
-        const col = Math.floor((e.clientX - rect.left) / CELL_SIZE);
-        const row = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+        const scaleX = canvasRef.current!.width / rect.width;
+        const scaleY = canvasRef.current!.height / rect.height;
+
+        const col = Math.floor(((e.clientX - rect.left) * scaleX) / CELL_SIZE);
+        const row = Math.floor(((e.clientY - rect.top) * scaleY) / CELL_SIZE);
 
         if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) return;
 
