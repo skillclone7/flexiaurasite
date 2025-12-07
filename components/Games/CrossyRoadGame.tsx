@@ -309,7 +309,7 @@ const CrossyRoadGame: React.FC = () => {
             animationRef.current = requestAnimationFrame(gameLoop);
         }
         return () => cancelAnimationFrame(animationRef.current);
-    }, [gameState]);
+    }, [gameState, level]);
 
     const handleDirection = (dir: 'up' | 'down' | 'left' | 'right') => {
         const now = Date.now();
@@ -362,19 +362,22 @@ const CrossyRoadGame: React.FC = () => {
                     ref={canvasRef}
                     width={CANVAS_WIDTH}
                     height={CANVAS_HEIGHT}
-                    className="bg-body rounded-xl shadow-2xl border-4 border-[#4a7c59] w-full h-auto max-w-full"
+                    className="bg-gray-800 rounded-xl block mx-auto max-w-full shadow-lg"
                 />
+
+                {/* Score and Level Display */}
                 {gameState === 'playing' && (
-                    <div className="absolute top-[-15px] left-1/2 transform -translate-x-1/2 bg-accent text-black px-6 py-1 rounded-full text-lg font-bold shadow-lg border-2 border-white z-10 whitespace-nowrap">
+                    <div className="absolute top-2 left-2 bg-white/90 px-3 py-1 rounded shadow text-sm font-bold">
                         Level: {level} | Score: {score}
                     </div>
                 )}
+
+                {/* Menu Overlay */}
                 {gameState === 'menu' && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-xl">
                         <div className="text-center">
-                            <h2 className="text-3xl font-bold text-white mb-4">Crossy Road</h2>
+                            <h2 className="text-4xl font-bold text-white mb-4">Crossy Road</h2>
                             <p className="text-white mb-4">Use arrow keys to move</p>
-                            <p className="text-white mb-4 text-sm">Avoid cars and reach the top!</p>
                             <button
                                 onClick={() => resetGame(true)}
                                 className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition-colors"
@@ -387,6 +390,8 @@ const CrossyRoadGame: React.FC = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Game Over Overlay */}
                 {gameState === 'gameover' && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-xl">
                         <div className="text-center">
@@ -436,7 +441,6 @@ const CrossyRoadGame: React.FC = () => {
                 </button>
             </div>
         </div>
-
     );
 };
 

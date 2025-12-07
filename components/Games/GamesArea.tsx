@@ -1,12 +1,12 @@
 
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { GameType } from '../../types';
 import SnakeGame from './SnakeGame';
 import ChessGame from './ChessGame';
 import CheckersGame from './CheckersGame';
-import Match3Game from './Match3Game';
-import CrossyRoadGame from './CrossyRoadGame';
+import TetrisGame from './TetrisGame';
 
 const GamesArea: React.FC = () => {
   const { t } = useLanguage();
@@ -19,8 +19,7 @@ const GamesArea: React.FC = () => {
       case 'snake': return t('snakeInstructions');
       case 'chess': return t('chessInstructions');
       case 'checkers': return t('checkersInstructions');
-      case 'candycrush': return t('candycrushInstructions');
-      case 'crossyroad': return t('crossyroadInstructions');
+      case 'tetris': return t('tetrisInstructions');
       default: return '';
     }
   };
@@ -30,8 +29,7 @@ const GamesArea: React.FC = () => {
       case 'snake': return t('snakeGame');
       case 'chess': return t('chessGame');
       case 'checkers': return t('checkersGame');
-      case 'candycrush': return t('candycrushGame');
-      case 'crossyroad': return t('crossyroadGame');
+      case 'tetris': return t('tetrisGame');
       default: return '';
     }
   };
@@ -43,7 +41,7 @@ const GamesArea: React.FC = () => {
         <p className="text-center text-gray max-w-[700px] mx-auto mb-10 text-lg">{t('gamesSubtitle')}</p>
 
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
-          {(['snake', 'chess', 'checkers', 'candycrush', 'crossyroad'] as GameType[]).map((game) => (
+          {(['snake', 'chess', 'checkers', 'tetris'] as GameType[]).map((game) => (
             <button
               key={game}
               onClick={() => setActiveGame(game)}
@@ -72,19 +70,14 @@ const GamesArea: React.FC = () => {
           <div className="text-center mb-5 w-full max-w-[600px]">
             <h3 className="text-2xl font-bold mb-2 text-primary">{getTitle()}</h3>
             <p className="mb-4 text-text">{getInstructions()}</p>
-            {activeGame === 'snake' && (
-              <p className="font-semibold text-lg text-secondary">
-                {t('score')}: <span className="text-accent">{score}</span>
-              </p>
-            )}
+
           </div>
 
           <div className={`w-full mx-auto ${isFullscreen ? 'max-w-full h-full flex items-center justify-center' : 'max-w-[600px]'}`}>
             {activeGame === 'snake' && <SnakeGame onScoreUpdate={setScore} />}
             {activeGame === 'chess' && <ChessGame />}
             {activeGame === 'checkers' && <CheckersGame />}
-            {activeGame === 'candycrush' && <Match3Game />}
-            {activeGame === 'crossyroad' && <CrossyRoadGame />}
+            {activeGame === 'tetris' && <TetrisGame />}
           </div>
         </div>
 
