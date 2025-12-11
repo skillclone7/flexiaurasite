@@ -1,3 +1,4 @@
+
 @echo off
 echo Syncing changes to GitHub...
 git add .

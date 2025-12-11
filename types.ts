@@ -18,4 +18,4 @@ export interface ContentData {
   videos: Video[];
 }
 
-export type GameType = 'snake' | 'chess' | 'checkers' | 'tetris';
+export type GameType = 'snake' | 'chess' | 'checkers' | 'tetris' | 'bowandarrow';

@@ -7,6 +7,7 @@ import SnakeGame from './SnakeGame';
 import ChessGame from './ChessGame';
 import CheckersGame from './CheckersGame';
 import TetrisGame from './TetrisGame';
+import BowAndArrowGame from './BowAndArrowGame';
 
 const GamesArea: React.FC = () => {
   const { t } = useLanguage();
@@ -20,6 +21,7 @@ const GamesArea: React.FC = () => {
       case 'chess': return t('chessInstructions');
       case 'checkers': return t('checkersInstructions');
       case 'tetris': return t('tetrisInstructions');
+      case 'bowandarrow': return t('bowandarrowInstructions');
       default: return '';
     }
   };
@@ -30,6 +32,7 @@ const GamesArea: React.FC = () => {
       case 'chess': return t('chessGame');
       case 'checkers': return t('checkersGame');
       case 'tetris': return t('tetrisGame');
+      case 'bowandarrow': return t('bowandarrowGame');
       default: return '';
     }
   };
@@ -41,7 +44,7 @@ const GamesArea: React.FC = () => {
         <p className="text-center text-gray max-w-[700px] mx-auto mb-10 text-lg">{t('gamesSubtitle')}</p>
 
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
-          {(['snake', 'chess', 'checkers', 'tetris'] as GameType[]).map((game) => (
+          {(['snake', 'chess', 'checkers', 'tetris', 'bowandarrow'] as GameType[]).map((game) => (
             <button
               key={game}
               onClick={() => setActiveGame(game)}
@@ -78,6 +81,7 @@ const GamesArea: React.FC = () => {
             {activeGame === 'chess' && <ChessGame />}
             {activeGame === 'checkers' && <CheckersGame />}
             {activeGame === 'tetris' && <TetrisGame />}
+            {activeGame === 'bowandarrow' && <BowAndArrowGame onScoreUpdate={setScore} />}
           </div>
         </div>
 
