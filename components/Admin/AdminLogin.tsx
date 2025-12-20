@@ -18,10 +18,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onClose }) => {
     setIsLoading(true);
     setError('');
 
-    const success = await login(email, password);
+    const result = await login(email, password);
 
-    if (!success) {
-      setError('Credenciais inválidas ou sem permissão.');
+    if (!result.success) {
+      setError(result.error || 'Credenciais inválidas ou sem permissão.');
       setIsLoading(false);
     }
   };
@@ -48,7 +48,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onClose }) => {
           <div>
             <label className="block text-sm font-medium text-text mb-1">Email</label>
             <input
-              type="password"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 rounded-lg border border-gray bg-body text-text focus:border-accent outline-none transition-colors"

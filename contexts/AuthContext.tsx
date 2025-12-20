@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (email: string, pass: string) => {
+  const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
@@ -31,25 +31,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.user) {
         // Check if user is admin
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', data.user.id)
           .single()
 
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          return { success: false, error: 'Erro ao verificar perfil: ' + profileError.message };
+        }
+
         if (profile?.role === 'admin') {
           setIsAuthenticated(true);
           localStorage.setItem('flexiaura_admin_auth', 'true');
-          return true;
+          return { success: true };
         } else {
+          console.warn('User is not admin or profile not found');
           await supabase.auth.signOut();
-          throw new Error('Unauthorized access');
+          return { success: false, error: 'Usuário não tem permissão de administrador.' };
         }
       }
-      return false;
-    } catch (error) {
+      return { success: false, error: 'Usuário não encontrado.' };
+    } catch (error: any) {
       console.error('Login error:', error);
-      return false;
+      return { success: false, error: error.message || 'Erro desconhecido ao fazer login.' };
     }
   };
 
