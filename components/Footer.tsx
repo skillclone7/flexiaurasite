@@ -32,6 +32,11 @@ const Footer: React.FC = () => {
           <div>
             <div className="font-serif text-3xl mb-5">FlexiAura</div>
             <p className="mb-6 opacity-90">{t('footerMission')}</p>
+            {t('contactInfo') && (
+              <p className="mb-6 text-sm text-gray-400 border-l-2 border-accent pl-3 italic">
+                {t('contactInfo')}
+              </p>
+            )}
             <div className="flex gap-4">
               {['facebook-f', 'twitter', 'linkedin-in', 'instagram'].map(icon => (
                 <a key={icon} href="#" className="flex items-center justify-center w-10 h-10 bg-white/10 rounded-full text-white transition-all hover:bg-accent hover:-translate-y-1">

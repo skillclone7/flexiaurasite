@@ -27,15 +27,19 @@ const initialContent: ContentData = {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('pt');
-  const [customContent, setCustomContent] = useState<ContentData>(initialContent);
-
-  // Load from LocalStorage on mount
-  useEffect(() => {
-    const savedContent = localStorage.getItem('flexiaura_content_v1');
-    if (savedContent) {
-      setCustomContent(JSON.parse(savedContent));
+  const [customContent, setCustomContent] = useState<ContentData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('flexiaura_content_v1');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing saved content:', e);
+        }
+      }
     }
-  }, []);
+    return initialContent;
+  });
 
   // Save to LocalStorage on change
   useEffect(() => {

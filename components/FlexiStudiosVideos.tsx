@@ -5,7 +5,7 @@ import FadeIn from './FadeIn';
 
 const FlexiStudiosVideos: React.FC = () => {
   const { t, customContent } = useLanguage();
-  const videos = customContent.videos;
+  const videos = customContent.videos || [];
   const [visibleCount, setVisibleCount] = useState(6);
 
   const visibleVideos = videos.slice(0, visibleCount);
