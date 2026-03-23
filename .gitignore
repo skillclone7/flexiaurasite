@@ -3,10 +3,19 @@ logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Recommended: Environment files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Dependencies
 node_modules
 dist
 dist-ssr
@@ -22,3 +31,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build & Tooling
+.vercel
+.next
+.cache
+.turbo

@@ -48,11 +48,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onClose }) => {
           <div>
             <label className="block text-sm font-medium text-text mb-1">Email</label>
             <input
-              type="email"
+              type="password"
+              style={{ WebkitTextSecurity: "disc" }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 rounded-lg border border-gray bg-body text-text focus:border-accent outline-none transition-colors"
-              placeholder="admin@flexiaura.com"
+              placeholder="••••••••••••••••••"
               autoFocus
             />
           </div>
