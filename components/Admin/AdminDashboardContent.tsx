@@ -109,7 +109,7 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
     };
 
     const extractYouTubeId = (urlOrId: string) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
         const match = urlOrId.match(regExp);
         return (match && match[2].length === 11) ? match[2] : urlOrId;
     };

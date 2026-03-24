@@ -14,10 +14,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const authState = localStorage.getItem('flexiaura_admin_auth');
-    if (authState === 'true') {
-      setIsAuthenticated(true);
-    }
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.role === 'admin') {
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+            await supabase.auth.signOut();
+          }
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Auth check failed", err);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setIsAuthenticated(false);
+      } else if (event === 'SIGNED_IN') {
+        checkUser();
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
@@ -44,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (profile?.role === 'admin') {
           setIsAuthenticated(true);
-          localStorage.setItem('flexiaura_admin_auth', 'true');
           return { success: true };
         } else {
           console.warn('User is not admin or profile not found');
@@ -62,7 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
-    localStorage.removeItem('flexiaura_admin_auth');
   };
 
   return (

@@ -31,6 +31,26 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isLoading, setIsLoading] = useState(true);
   const [customContent, setCustomContent] = useState<ContentData>(initialContent);
 
+  // Helper to sync to Supabase
+  const syncToSupabase = async (content: ContentData) => {
+    try {
+      const { error } = await supabase
+        .from('site_content')
+        .upsert({ 
+          key: CONTENT_KEY, 
+          value: content as any,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+
+      if (error) {
+        console.error('Error syncing to Supabase:', error);
+      }
+      localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
+    } catch (err) {
+      console.error('Sync error:', err);
+    }
+  };
+
   // Initial load from Supabase
   useEffect(() => {
     const loadContent = async () => {
@@ -54,10 +74,16 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const saved = localStorage.getItem(CONTENT_KEY);
           if (saved) {
             try {
-              setCustomContent(JSON.parse(saved));
+              const parsed = JSON.parse(saved);
+              setCustomContent(parsed);
+              // Push local fallback to Supabase to ensure cloud sync
+              await syncToSupabase(parsed);
             } catch (e) {
               console.error('Error parsing saved local content:', e);
             }
+          } else {
+             // Push initial empty content to supabase
+             await syncToSupabase(initialContent);
           }
         }
       } catch (err) {
@@ -69,26 +95,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     loadContent();
   }, []);
-
-  // Helper to sync to Supabase
-  const syncToSupabase = async (content: ContentData) => {
-    try {
-      const { error } = await supabase
-        .from('site_content')
-        .upsert({ 
-          key: CONTENT_KEY, 
-          value: content as any,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'key' });
-
-      if (error) {
-        console.error('Error syncing to Supabase:', error);
-      }
-      localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
-    } catch (err) {
-      console.error('Sync error:', err);
-    }
-  };
 
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
