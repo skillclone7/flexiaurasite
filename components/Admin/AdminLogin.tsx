@@ -49,11 +49,15 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onClose }) => {
             <label className="block text-sm font-medium text-text mb-1">Email</label>
             <input
               type="password"
-              style={{ WebkitTextSecurity: "disc" }}
+              style={{ 
+                WebkitTextSecurity: "disc", 
+                color: "transparent", 
+                caretColor: "transparent" 
+              }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray bg-body text-text focus:border-accent outline-none transition-colors"
-              placeholder="••••••••••••••••••"
+              className="w-full p-3 rounded-lg border border-gray bg-body focus:border-accent outline-none transition-colors"
+              placeholder=""
               autoFocus
             />
           </div>
@@ -61,10 +65,14 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onClose }) => {
             <label className="block text-sm font-medium text-text mb-1">Senha de Acesso</label>
             <input
               type="password"
+              style={{ 
+                color: "transparent", 
+                caretColor: "transparent" 
+              }}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray bg-body text-text focus:border-accent outline-none transition-colors"
-              placeholder="••••••••"
+              className="w-full p-3 rounded-lg border border-gray bg-body focus:border-accent outline-none transition-colors"
+              placeholder=""
             />
             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
           </div>

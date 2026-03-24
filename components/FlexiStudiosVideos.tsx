@@ -4,9 +4,17 @@ import { useLanguage } from '../contexts/LanguageContext';
 import FadeIn from './FadeIn';
 
 const FlexiStudiosVideos: React.FC = () => {
-  const { t, customContent } = useLanguage();
+  const { t, customContent, isLoading } = useLanguage();
   const videos = customContent.videos || [];
   const [visibleCount, setVisibleCount] = useState(6);
+
+  if (isLoading) {
+    return (
+      <div className="py-24 bg-[#1a1a1a] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
 
   const visibleVideos = videos.slice(0, visibleCount);
   const hasMore = visibleCount < videos.length;

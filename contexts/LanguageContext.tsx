@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { DICTIONARY } from '../constants';
 import { ContentData, Language, Video } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface LanguageContextType {
   language: Language;
@@ -11,61 +12,116 @@ interface LanguageContextType {
   updateCustomContent: (data: Partial<ContentData>) => void;
   addVideo: (video: Video) => void;
   removeVideo: (id: string) => void;
+  isLoading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Initial default videos
-const defaultVideos: Video[] = [];
+const CONTENT_KEY = 'flexiaura_content_v1';
 
 const initialContent: ContentData = {
   heroTitle: "",
   heroSubtitle: "",
   contactInfo: "",
-  videos: defaultVideos
+  videos: []
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('pt');
-  const [customContent, setCustomContent] = useState<ContentData>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('flexiaura_content_v1');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error('Error parsing saved content:', e);
-        }
-      }
-    }
-    return initialContent;
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [customContent, setCustomContent] = useState<ContentData>(initialContent);
 
-  // Save to LocalStorage on change
+  // Initial load from Supabase
   useEffect(() => {
-    localStorage.setItem('flexiaura_content_v1', JSON.stringify(customContent));
-  }, [customContent]);
+    const loadContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_content')
+          .select('value')
+          .eq('key', CONTENT_KEY)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is 'no rows returned'
+          console.error('Error fetching content from Supabase:', error);
+        }
+
+        if (data?.value) {
+          setCustomContent(data.value as unknown as ContentData);
+          // Also update localStorage as backup
+          localStorage.setItem(CONTENT_KEY, JSON.stringify(data.value));
+        } else {
+          // Fallback to localStorage if no data in Supabase
+          const saved = localStorage.getItem(CONTENT_KEY);
+          if (saved) {
+            try {
+              setCustomContent(JSON.parse(saved));
+            } catch (e) {
+              console.error('Error parsing saved local content:', e);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Unexpected error loading content:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContent();
+  }, []);
+
+  // Helper to sync to Supabase
+  const syncToSupabase = async (content: ContentData) => {
+    try {
+      const { error } = await supabase
+        .from('site_content')
+        .upsert({ 
+          key: CONTENT_KEY, 
+          value: content as any,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+
+      if (error) {
+        console.error('Error syncing to Supabase:', error);
+      }
+      localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
+    } catch (err) {
+      console.error('Sync error:', err);
+    }
+  };
 
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
   const updateCustomContent = (data: Partial<ContentData>) => {
-    setCustomContent(prev => ({ ...prev, ...data }));
+    setCustomContent(prev => {
+      const next = { ...prev, ...data };
+      syncToSupabase(next);
+      return next;
+    });
   };
 
   const addVideo = (video: Video) => {
-    setCustomContent(prev => ({
-      ...prev,
-      videos: [video, ...prev.videos]
-    }));
+    setCustomContent(prev => {
+      const next = {
+        ...prev,
+        videos: [video, ...prev.videos]
+      };
+      syncToSupabase(next);
+      return next;
+    });
   };
 
   const removeVideo = (id: string) => {
-    setCustomContent(prev => ({
-      ...prev,
-      videos: prev.videos.filter(v => v.id !== id)
-    }));
+    setCustomContent(prev => {
+      const next = {
+        ...prev,
+        videos: prev.videos.filter(v => v.id !== id)
+      };
+      syncToSupabase(next);
+      return next;
+    });
   };
 
   const t = (key: string): string => {
@@ -84,7 +140,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       customContent,
       updateCustomContent,
       addVideo,
-      removeVideo
+      removeVideo,
+      isLoading
     }}>
       {children}
     </LanguageContext.Provider>
