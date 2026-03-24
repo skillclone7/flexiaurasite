@@ -66,9 +66,17 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
 
         if (data?.value) {
-          setCustomContent(data.value as unknown as ContentData);
+          let parsedData = data.value;
+          if (typeof data.value === 'string') {
+            try {
+              parsedData = JSON.parse(data.value);
+            } catch (e) {
+              console.error('Failed to parse data.value from supabase:', e);
+            }
+          }
+          setCustomContent(parsedData as unknown as ContentData);
           // Also update localStorage as backup
-          localStorage.setItem(CONTENT_KEY, JSON.stringify(data.value));
+          localStorage.setItem(CONTENT_KEY, JSON.stringify(parsedData));
         } else {
           // Fallback to localStorage if no data in Supabase
           const saved = localStorage.getItem(CONTENT_KEY);
