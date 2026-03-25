@@ -31,9 +31,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isLoading, setIsLoading] = useState(true);
   const [customContent, setCustomContent] = useState<ContentData>(initialContent);
 
-  // Helper to sync to Supabase
+  // Helper to sync to Supabase - ONLY works when authenticated as admin
   const syncToSupabase = async (content: ContentData) => {
     try {
+      // Check for active auth session before writing (RLS requires admin role)
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        console.warn('[Sync] No auth session — skipping Supabase write. Saving to localStorage only.');
+        localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
+        return;
+      }
+
+      console.log('[Sync] Authenticated user — writing to Supabase...');
       const { error } = await supabase
         .from('site_content')
         .upsert({ 
@@ -43,59 +52,76 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }, { onConflict: 'key' });
 
       if (error) {
-        console.error('Error syncing to Supabase:', error);
+        console.error('[Sync] Error writing to Supabase:', error);
+      } else {
+        console.log('[Sync] Successfully synced to Supabase');
       }
       localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
     } catch (err) {
-      console.error('Sync error:', err);
+      console.error('[Sync] Unexpected sync error:', err);
+      // Still save to localStorage as fallback
+      localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
     }
   };
 
-  // Initial load from Supabase
+  // Initial load: Supabase (source of truth) → localStorage (cache) → initialContent (default)
   useEffect(() => {
     const loadContent = async () => {
       try {
+        console.log('[Load] Fetching content from Supabase...');
         const { data, error } = await supabase
           .from('site_content')
           .select('value')
           .eq('key', CONTENT_KEY)
           .single();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is 'no rows returned'
-          console.error('Error fetching content from Supabase:', error);
+        if (error && error.code !== 'PGRST116') {
+          console.error('[Load] Supabase fetch error:', error);
         }
 
         if (data?.value) {
+          // Supabase has data — use it as source of truth
           let parsedData = data.value;
           if (typeof data.value === 'string') {
             try {
               parsedData = JSON.parse(data.value);
             } catch (e) {
-              console.error('Failed to parse data.value from supabase:', e);
+              console.error('[Load] Failed to parse Supabase value:', e);
             }
           }
+          console.log('[Load] Loaded content from Supabase:', parsedData);
           setCustomContent(parsedData as unknown as ContentData);
-          // Also update localStorage as backup
+          // Update localStorage cache
           localStorage.setItem(CONTENT_KEY, JSON.stringify(parsedData));
         } else {
-          // Fallback to localStorage if no data in Supabase
+          // No Supabase data — fall back to localStorage cache (read-only, do NOT try to write back)
+          console.warn('[Load] No data in Supabase, falling back to localStorage...');
           const saved = localStorage.getItem(CONTENT_KEY);
           if (saved) {
             try {
               const parsed = JSON.parse(saved);
+              console.log('[Load] Loaded content from localStorage:', parsed);
               setCustomContent(parsed);
-              // Push local fallback to Supabase to ensure cloud sync
-              await syncToSupabase(parsed);
+              // Do NOT call syncToSupabase here — visitor may not be authenticated
             } catch (e) {
-              console.error('Error parsing saved local content:', e);
+              console.error('[Load] Error parsing localStorage:', e);
             }
           } else {
-             // Push initial empty content to supabase
-             await syncToSupabase(initialContent);
+            console.log('[Load] No cached data found, using defaults');
+            // Do NOT call syncToSupabase here — visitor is not authenticated
           }
         }
       } catch (err) {
-        console.error('Unexpected error loading content:', err);
+        console.error('[Load] Unexpected error:', err);
+        // Last resort: try localStorage
+        const saved = localStorage.getItem(CONTENT_KEY);
+        if (saved) {
+          try {
+            setCustomContent(JSON.parse(saved));
+          } catch (e) {
+            console.error('[Load] localStorage parse error:', e);
+          }
+        }
       } finally {
         setIsLoading(false);
       }

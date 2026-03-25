@@ -91,6 +91,28 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
     const [newVideoId, setNewVideoId] = useState('');
     const [newVideoTitle, setNewVideoTitle] = useState('');
 
+    // Sync state
+    const [syncStatus, setSyncStatus] = useState<'idle'|'syncing'|'success'|'error'>('idle');
+
+    const handleForceSync = async () => {
+        setSyncStatus('syncing');
+        try {
+            // Force push current content to Supabase (admin is authenticated so RLS allows it)
+            updateCustomContent({
+                heroTitle: customContent.heroTitle,
+                heroSubtitle: customContent.heroSubtitle,
+                contactInfo: customContent.contactInfo,
+                videos: customContent.videos
+            });
+            setSyncStatus('success');
+            setTimeout(() => setSyncStatus('idle'), 3000);
+        } catch (err) {
+            console.error('Force sync error:', err);
+            setSyncStatus('error');
+            setTimeout(() => setSyncStatus('idle'), 3000);
+        }
+    };
+
     // Hydrate form
     useEffect(() => {
         setHeroTitle(t('heroTitle'));
@@ -107,6 +129,7 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
         });
         alert('Conteúdo atualizado com sucesso!');
     };
+
 
     const extractYouTubeId = (urlOrId: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
@@ -204,6 +227,37 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
                                 <div className="text-center text-gray py-8">
                                     <p>Nenhuma atividade recente registrada.</p>
                                 </div>
+                            </div>
+
+                            {/* Sync to Cloud Card */}
+                            <div className="col-span-1 bg-card p-6 rounded-xl shadow-sm border border-white/5 mt-4">
+                                <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                                    <i className="fas fa-cloud-arrow-up text-blue-400"></i>
+                                    Sync to Cloud
+                                </h3>
+                                <p className="text-xs text-gray mb-4">
+                                    Push current content to Supabase so the live web version updates.
+                                </p>
+                                <button
+                                    onClick={handleForceSync}
+                                    disabled={syncStatus === 'syncing'}
+                                    className={`w-full px-4 py-3 rounded-lg font-semibold transition-all ${
+                                        syncStatus === 'success' ? 'bg-green-500 text-white' :
+                                        syncStatus === 'error' ? 'bg-red-500 text-white' :
+                                        syncStatus === 'syncing' ? 'bg-blue-500/50 text-white cursor-wait' :
+                                        'bg-blue-500 text-white hover:bg-blue-600'
+                                    }`}
+                                >
+                                    {syncStatus === 'syncing' ? '⏳ Syncing...' :
+                                     syncStatus === 'success' ? '✅ Synced!' :
+                                     syncStatus === 'error' ? '❌ Error' :
+                                     '🔄 Sync Now'}
+                                </button>
+                                <p className="text-xs text-gray mt-2">
+                                    Videos: {customContent.videos.length} | 
+                                    Hero: {customContent.heroTitle ? '✅' : '—'} | 
+                                    Subtitle: {customContent.heroSubtitle ? '✅' : '—'}
+                                </p>
                             </div>
                         </div>
                     )}
