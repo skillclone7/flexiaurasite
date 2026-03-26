@@ -23,7 +23,8 @@ const initialContent: ContentData = {
   heroTitle: "",
   heroSubtitle: "",
   contactInfo: "",
-  videos: []
+  videos: [],
+  quemSomosPhotos: {}
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

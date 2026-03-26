@@ -16,6 +16,15 @@ export interface ContentData {
   heroSubtitle: string;
   contactInfo: string;
   videos: Video[];
+  quemSomosPhotos?: {
+    ceo?: string;
+    vceo?: string;
+    logisticsDir?: string;
+    flexihelpDir?: string;
+    agentSpecialist?: string;
+    flexihelpMgr?: string;
+    fleximarketMgr?: string;
+  };
 }
 
 export type GameType = 'snake' | 'chess' | 'checkers' | 'tetris' | 'bowandarrow';

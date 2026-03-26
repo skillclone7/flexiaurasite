@@ -3,7 +3,8 @@ import FadeIn from './FadeIn';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const QuemSomos: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, customContent } = useLanguage();
+  const photos = customContent.quemSomosPhotos || {};
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-body">
@@ -29,7 +30,7 @@ const QuemSomos: React.FC = () => {
               <div className="bg-card hover:bg-card/80 transition-all duration-500 rounded-3xl p-8 md:p-10 border border-gray/10 shadow-xl relative overflow-hidden h-full flex flex-col md:flex-row gap-8 items-center md:items-start group-hover:border-accent/30 group-hover:translate-y-[-5px]">
                 {/* Visual Placeholder for Photo */}
                 <div className="w-48 h-64 shrink-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center border border-gray/10 overflow-hidden relative">
-                  <img src="/dist/fotos/clesio.png" alt="Clésio L. Rosário José" className="w-full h-full object-cover" title="CEO Clesio" />
+                  <img src={photos.ceo || "/fotos/clesio.png"} alt="Clésio L. Rosário José" className="w-full h-full object-cover" title="CEO Clesio" />
                 </div>
 
                 <div className="flex-1">
@@ -52,7 +53,7 @@ const QuemSomos: React.FC = () => {
               <div className="bg-card hover:bg-card/80 transition-all duration-500 rounded-3xl p-8 md:p-10 border border-gray/10 shadow-xl relative overflow-hidden h-full flex flex-col md:flex-row gap-8 items-center md:items-start group-hover:border-accent/30 group-hover:translate-y-[-5px]">
                 {/* Visual Placeholder for Photo */}
                 <div className="w-48 h-64 shrink-0 bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl flex items-center justify-center border border-gray/10 overflow-hidden relative">
-                  <img src="/dist/fotos/claudio%20jpg.jpeg" alt="Cláudio Pedro Domingos Sequeira Gaspar" className="w-full h-full object-cover" />
+                  <img src={photos.vceo || "/fotos/claudio%20jpg.jpeg"} alt="Cláudio Pedro Domingos Sequeira Gaspar" className="w-full h-full object-cover" />
                 </div>
 
                 <div className="flex-1">
@@ -83,7 +84,7 @@ const QuemSomos: React.FC = () => {
             {/* Melquesidec Gerónimo Mondo */}
             <FadeIn delay={100} className="bg-card/50 hover:bg-card transition-all duration-300 rounded-3xl p-8 border border-gray/5 flex flex-col items-center text-center group shadow-lg">
               <div className="w-44 h-44 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 border border-primary/5 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
-                <img src="/dist/fotos/MELKE%20-%20Copy.jpeg" alt="Melquesidec Gerónimo Mondo" className="w-full h-full object-cover" />
+                <img src={photos.logisticsDir || "/fotos/MELKE%20-%20Copy.jpeg"} alt="Melquesidec Gerónimo Mondo" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-2xl font-bold text-text mb-2">Melquesidec Gerónimo Mondo</h3>
               <p className="text-accent text-sm uppercase tracking-widest mb-6 font-semibold">{t('logisticsDirTitle')}</p>
@@ -95,7 +96,7 @@ const QuemSomos: React.FC = () => {
             {/* Joaquim Magalhães Oliveira */}
             <FadeIn delay={200} className="bg-card/50 hover:bg-card transition-all duration-300 rounded-3xl p-8 border border-gray/5 flex flex-col items-center text-center group shadow-lg">
               <div className="w-44 h-44 bg-secondary/10 rounded-2xl flex items-center justify-center mb-8 border border-secondary/5 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
-                <img src="/dist/fotos/IMG-20260323-WA0009.jpg" alt="Joaquim Magalhães Oliveira" className="w-full h-full object-cover" />
+                <img src={photos.flexihelpDir || "/fotos/IMG-20260323-WA0009.jpg"} alt="Joaquim Magalhães Oliveira" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-2xl font-bold text-text mb-2">Joaquim Magalhães Oliveira</h3>
               <p className="text-accent text-sm uppercase tracking-widest mb-6 font-semibold">{t('flexihelpDirTitle')}</p>
@@ -107,7 +108,7 @@ const QuemSomos: React.FC = () => {
             {/* Paulo JR Gomes */}
             <FadeIn delay={300} className="bg-card/50 hover:bg-card transition-all duration-300 rounded-3xl p-8 border border-gray/5 flex flex-col items-center text-center group shadow-lg">
               <div className="w-44 h-44 bg-accent/10 rounded-2xl flex items-center justify-center mb-8 border border-accent/5 group-hover:scale-110 transition-transform overflow-hidden shadow-inner">
-                <img src="/dist/fotos/fitty.png" alt="Paulo Gomes" className="w-full h-full object-cover" />
+                <img src={photos.agentSpecialist || "/fotos/fitty.png"} alt="Paulo Gomes" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-2xl font-bold text-text mb-2">Paulo Gomes</h3>
               <p className="text-accent text-sm uppercase tracking-widest mb-6 font-semibold">{t('agentSpecialist')}</p>
@@ -130,7 +131,7 @@ const QuemSomos: React.FC = () => {
             <FadeIn delay={100} className="group">
               <div className="bg-card hover:bg-card/80 transition-all duration-500 rounded-3xl p-8 md:p-10 border border-gray/10 shadow-xl relative overflow-hidden h-full flex flex-col md:flex-row gap-8 items-center md:items-start group-hover:border-accent/30 group-hover:translate-y-[-5px]">
                 <div className="w-48 h-64 shrink-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-2xl flex items-center justify-center border border-gray/10 overflow-hidden relative shadow-md">
-                  <img src="/dist/fotos/vladmilson.jpg" alt="Vladmilson Manuel Gama" className="w-full h-full object-cover" />
+                  <img src={photos.flexihelpMgr || "/fotos/vladmilson.jpg"} alt="Vladmilson Manuel Gama" className="w-full h-full object-cover" />
                 </div>
 
                 <div className="flex-1">
@@ -149,7 +150,7 @@ const QuemSomos: React.FC = () => {
             <FadeIn delay={200} className="group">
               <div className="bg-card hover:bg-card/80 transition-all duration-500 rounded-3xl p-8 md:p-10 border border-gray/10 shadow-xl relative overflow-hidden h-full flex flex-col md:flex-row gap-8 items-center md:items-start group-hover:border-accent/30 group-hover:translate-y-[-5px]">
                 <div className="w-48 h-64 shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center border border-gray/10 overflow-hidden relative shadow-md">
-                  <img src="/dist/fotos/marcio.jpg" alt="Marcio Lopes" className="w-full h-full object-cover" />
+                  <img src={photos.fleximarketMgr || "/fotos/marcio.jpg"} alt="Marcio Lopes" className="w-full h-full object-cover" />
                 </div>
 
                 <div className="flex-1">

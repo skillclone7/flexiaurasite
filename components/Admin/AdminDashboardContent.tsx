@@ -86,6 +86,15 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
     const [heroTitle, setHeroTitle] = useState('');
     const [heroSubtitle, setHeroSubtitle] = useState('');
     const [contactInfo, setContactInfo] = useState('');
+    const [quemSomosPhotos, setQuemSomosPhotos] = useState<Record<string, string>>({
+        ceo: '',
+        vceo: '',
+        logisticsDir: '',
+        flexihelpDir: '',
+        agentSpecialist: '',
+        flexihelpMgr: '',
+        fleximarketMgr: ''
+    });
 
     // Video States
     const [newVideoId, setNewVideoId] = useState('');
@@ -102,6 +111,7 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
                 heroTitle: customContent.heroTitle,
                 heroSubtitle: customContent.heroSubtitle,
                 contactInfo: customContent.contactInfo,
+                quemSomosPhotos: customContent.quemSomosPhotos,
                 videos: customContent.videos
             });
             setSyncStatus('success');
@@ -118,14 +128,18 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
         setHeroTitle(t('heroTitle'));
         setHeroSubtitle(t('heroSubtitle'));
         setContactInfo(t('contactInfo'));
-    }, []);
+        if (customContent.quemSomosPhotos) {
+            setQuemSomosPhotos(customContent.quemSomosPhotos as Record<string, string>);
+        }
+    }, [customContent]);
 
     const handleSaveContent = (e: React.FormEvent) => {
         e.preventDefault();
         updateCustomContent({
             heroTitle,
             heroSubtitle,
-            contactInfo
+            contactInfo,
+            quemSomosPhotos
         });
         alert('Conteúdo atualizado com sucesso!');
     };
@@ -291,6 +305,21 @@ export const AdminDashboardContent: React.FC<AdminDashboardContentProps> = ({ on
                                         value={contactInfo}
                                         onChange={e => setContactInfo(e.target.value)}
                                     />
+                                </div>
+                                <h4 className="text-md font-semibold mt-8 mb-4 border-t border-gray/20 pt-6">Fotos da Equipe (URLs do Supabase Storage)</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {['ceo', 'vceo', 'logisticsDir', 'flexihelpDir', 'agentSpecialist', 'flexihelpMgr', 'fleximarketMgr'].map((key) => (
+                                        <div key={key}>
+                                            <label className="block text-xs font-medium mb-1 capitalize text-gray">{key}</label>
+                                            <input
+                                                type="text"
+                                                placeholder="https://suapabase..."
+                                                className="w-full p-3 bg-body border border-gray/20 rounded-lg text-text focus:border-accent outline-none text-sm"
+                                                value={quemSomosPhotos[key] || ''}
+                                                onChange={e => setQuemSomosPhotos({ ...quemSomosPhotos, [key]: e.target.value })}
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
                                 <div className="flex justify-end pt-4">
                                     <button type="submit" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors">
